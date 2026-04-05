@@ -5,48 +5,37 @@
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <style>
     html, body { height: 100%; margin: 0; background: #000; }
-    iframe { width: 100%; height: 100%; border: 0; display: block; }
-    #overlay {
-      position: fixed; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      background: #000;
-      cursor: pointer;
-      z-index: 10;
-    }
-    #playbtn {
-      width: 80px; height: 80px; border-radius: 50%;
-      background: #ff0000;
-      display: flex; align-items: center; justify-content: center;
-    }
-    #playbtn::after {
-      content: '';
-      border: 0px solid transparent;
-      border-top: 16px solid transparent;
-      border-bottom: 16px solid transparent;
-      border-left: 28px solid white;
-      margin-left: 6px;
-    }
+    #player { width: 100%; height: 100%; }
   </style>
 </head>
 <body>
-  <div id="overlay">
-    <div id="playbtn"></div>
-  </div>
-  <iframe id="player"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-    allowfullscreen
-    referrerpolicy="strict-origin-when-cross-origin">
-  </iframe>
+  <div id="player"></div>
+  <script src="https://www.youtube.com/iframe_api"></script>
   <script>
     const v = new URL(location.href).searchParams.get('v');
-    if (!v) { document.body.textContent = 'missing ?v='; }
-    else {
-      document.getElementById('overlay').addEventListener('click', () => {
-        document.getElementById('overlay').style.display = 'none';
-        document.getElementById('player').src =
-          `https://www.youtube-nocookie.com/embed/${v}?autoplay=1&rel=0`;
+    let player;
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        videoId: v || '',
+        playerVars: {
+          autoplay: 1,
+          mute: 1,
+          rel: 0,
+          modestbranding: 1,
+          origin: 'https://wlaszkiewicz.github.io'
+        },
+        events: {
+          onReady: e => e.target.playVideo()
+        }
       });
     }
+
+    window.addEventListener('message', e => {
+      if (!player) return;
+      if (e.data === 'play') player.playVideo();
+      if (e.data === 'pause') player.pauseVideo();
+      if (e.data?.load) player.loadVideoById(e.data.load);
+    });
   </script>
 </body>
 </html>
