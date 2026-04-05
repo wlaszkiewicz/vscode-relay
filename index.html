@@ -25,7 +25,10 @@
           origin: 'https://wlaszkiewicz.github.io'
         },
         events: {
-          onReady: e => e.target.playVideo()
+          onReady: e => {
+  e.target.playVideo();
+  window.parent.postMessage('ready', '*');
+}
         }
       });
     }
